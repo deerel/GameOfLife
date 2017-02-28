@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -13,16 +8,17 @@ namespace GameOfLife
 {
     public partial class Form1 : Form
     {
-        Board board;
-        Button start;
-        Button stop;
+        Board board = null;
+        Button start = null;
+        Button stop = null;
+        Label lblSteps = null;
+        TextBox steps = null;
         int count = 32;
         int squareSize = 15;
         int topMargin = 40;
 
-        bool run = false;
+        Thread runner = null;
 
-        Thread runner;
         public Form1()
         {
             InitializeComponent();
@@ -34,10 +30,6 @@ namespace GameOfLife
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
-
-
-  
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -56,45 +48,58 @@ namespace GameOfLife
             this.Controls.Add(start);
 
             stop = new Button();
-            stop.Text = "Start";
+            stop.Text = "Stop";
             stop.Height = topMargin;
             stop.Location = new Point(100, 0);
             stop.Width = 100;
             stop.Click += Stop_Click;
-            this.Controls.Add(start);
+            this.Controls.Add(stop);
 
-            runner = new Thread(board.run);
-            
+            lblSteps = new Label();
+            lblSteps.Height = topMargin;
+            lblSteps.Location = new Point(200, 0);
+            lblSteps.Width = 100;
+            lblSteps.Text = "Number of steps:";
+            this.Controls.Add(lblSteps);
 
+            steps = new TextBox();
+            steps.Height = topMargin;
+            steps.Location = new Point(300, 0);
+            steps.Width = 100;
+            steps.Text = "42";
+            this.Controls.Add(steps);        
         }
 
         private void Start_Click(object sender, EventArgs e)
         {
-            run = true;
-
-            runner.Start();
-        }
-
-        public static void runGame(object data)
-        {
-            int s = 10;
-            Board board = (Board)data;
-            while(s > 0)
+            if (runner == null || !runner.IsAlive)
             {
-                board.start();
-                System.Threading.Thread.Sleep(200);
-                s--;
+                runner = new Thread(board.run);
+                if (steps.Text == "")
+                {
+                    MessageBox.Show("Number of steps is empty!");
+                }
+                else
+                {
+                    int s;
+                    if (Int32.TryParse(steps.Text, out s))
+                    {
+                        runner.Start(s);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Number of steps must only contain an integer!");
+                    }
+                }
             }
         }
 
         private void Stop_Click(object sender, EventArgs e)
         {
-            run = false;
-        }
-
-        private void Form1_Click(object sender, EventArgs e)
-        {
-
+            if(runner != null && runner.IsAlive)
+            {
+                runner.Abort();
+            }
         }
     }
 }

@@ -13,12 +13,6 @@ namespace GameOfLife
         private int m_squareSize = 15;
         private int m_topMargin = 40;
 
-        public Board()
-        {
-            squares = new Square[m_count*m_count];
-            init();
-        }
-
         public Board(int count, int squareSize, int topMargin)
         {
             m_count = count;
@@ -48,21 +42,15 @@ namespace GameOfLife
             return null;
         }
 
-        public void start()
+        public void run(object data)
         {
-            updateSquareState();
-            updateSquareDisplay();
-        }
-
-        public void run(object steps)
-        {
-            int s = 10;
+            int s = (int)data;
             while (s > 0)
             {
                 updateSquareState();
                 updateSquareDisplay();
                 s--;
-                System.Threading.Thread.Sleep(200);
+                System.Threading.Thread.Sleep(100);
             }
             
         }
